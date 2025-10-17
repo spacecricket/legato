@@ -12,7 +12,7 @@ import Toolbar from 'primevue/toolbar'
 
               <div class="text-4xl font-bold text-lime-500">💬 Legato</div>
               <div class="text-lg font-extralight text-gray-300">
-                Focus-first chat inspired by 37 Signals'
+                Focus-first chat inspired by 37 Signals’ writeup,
                 <a href="https://37signals.com/group-chat-problems" target="_blank"><u>Group Chat Problems</u></a>
               </div>
             </div>
@@ -27,7 +27,7 @@ import Toolbar from 'primevue/toolbar'
     </div>
 
     <div class="w-full bg-neutral-900 text-center opacity-75 text-white font-extralight text-sm p-1">
-      Read: <a href="https://jatinsonavane.substack.com/p/old-man-yells-at-slack" target="_blank"><u>An old man yells at
+      Read: <a href="https://jatinsonavane.substack.com/p/old-man-yells-at-slack" target="_blank"><u>Old man yells at
           Slack</u></a>
     </div>
   </div>
