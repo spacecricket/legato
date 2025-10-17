@@ -25,6 +25,11 @@ import Toolbar from 'primevue/toolbar'
       class="w-full bg-neutral-800 text-center font-stretch-ultra-condensed opacity-75 text-white text-9xl p-8 font-extralight">
       COMING<br />SOON
     </div>
+
+    <div class="w-full bg-neutral-900 text-center opacity-75 text-white font-extralight text-sm p-1">
+      Read: <a href="https://jatinsonavane.substack.com/p/old-man-yells-at-slack" target="_blank"><u>An old man yells at
+          Slack</u></a>
+    </div>
   </div>
 </template>
 
