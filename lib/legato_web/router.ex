@@ -5,8 +5,21 @@ defmodule LegatoWeb.Router do
     plug :accepts, ["json"]
   end
 
+  pipeline :api_session do
+    plug :fetch_session
+  end
+
   scope "/api", LegatoWeb do
     pipe_through :api
+
+    scope "/sign-in" do
+      pipe_through :api_session
+
+      post "/start",  SignInController, :start
+      get  "/verify", SignInController, :verify
+      post "/finish", SignInController, :finish
+    end
+
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

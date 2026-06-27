@@ -12,6 +12,8 @@ config :legato, LegatoWeb.Endpoint,
     ]
   ]
 
+config :legato, :cors_origins, ["https://legato.chat"]
+
 # Configure Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Req
 

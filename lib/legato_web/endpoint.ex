@@ -8,12 +8,20 @@ defmodule LegatoWeb.Endpoint do
     store: :cookie,
     key: "_legato_key",
     signing_salt: "KCV2mwCa",
-    same_site: "Lax"
+    same_site: "Lax",
+    http_only: true,       # Keeps it secure from JS theft
+    max_age: 172_800       # <--- 2 days in seconds
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
     websocket: [connect_info: [session: @session_options]],
     longpoll: [connect_info: [session: @session_options]]
+
+  socket "/sign-in-socket", LegatoWeb.SignInSocket,
+    websocket: [connect_info: [session: @session_options]]
+
+  socket "/workspace-socket", LegatoWeb.WorkspaceSocket,
+    websocket: [connect_info: [session: @session_options]]
 
   # Serve at "/" the static files from "priv/static" directory.
   #
@@ -49,5 +57,10 @@ defmodule LegatoWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+  # Read your configuration at compile time
+  plug Corsica,
+    origins: Application.compile_env(:legato, :cors_origins, []),
+    allow_credentials: true,
+    allow_headers: :all
   plug LegatoWeb.Router
 end

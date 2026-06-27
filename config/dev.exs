@@ -49,6 +49,8 @@ config :legato, LegatoWeb.Endpoint,
 # configured to run both http and https servers on
 # different ports.
 
+config :legato, :cors_origins, ["http://localhost:5173"]
+
 # Enable dev routes for dashboard and mailbox
 config :legato, dev_routes: true
 
