@@ -16,8 +16,7 @@ defmodule LegatoWeb.Router do
       pipe_through :api_session
 
       post "/start",  SignInController, :start
-      get  "/verify", SignInController, :verify
-      post "/finish", SignInController, :finish
+      post "/verify", SignInController, :verify
     end
 
   end

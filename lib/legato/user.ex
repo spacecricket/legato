@@ -13,7 +13,7 @@ defmodule Legato.User do
     field :is_deleted, :boolean, default: false
     field :inserted_by, :string
     field :updated_by, :string
-    field :workspace_id, :id
+    belongs_to :workspace, Legato.Workspace
 
     timestamps(type: :utc_datetime)
   end
@@ -21,8 +21,9 @@ defmodule Legato.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:email, :first_name, :last_name, :handle, :phone_number, :avatar_url, :inserted_by, :updated_by])
-    |> validate_required([:email, :first_name, :last_name, :handle, :phone_number, :avatar_url, :inserted_by, :updated_by])
+    |> cast(attrs, [:workspace_id, :email, :first_name, :last_name, :handle, :phone_number, :avatar_url, :inserted_by, :updated_by])
+    |> validate_required([:workspace_id, :email, :first_name, :last_name, :handle, :phone_number, :avatar_url, :inserted_by, :updated_by])
     |> unique_constraint(:email)
+    |> foreign_key_constraint(:workspace_id)
   end
 end
