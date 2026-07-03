@@ -41,13 +41,15 @@ defmodule Legato.Accounts do
     end
   end
 
-  def get_active_sign_in_code(code_key, device_fingerprint) do
+  def get_active_sign_in_code(code_key, code, device_fingerprint) do
     now = DateTime.utc_now()
+    code_int = String.to_integer(code)
 
     SignInCode
     |> where(
         [s],
         s.code_key == ^code_key
+          and s.code == ^code_int
           and is_nil(s.verified_at)
           and s.expires_at > ^now
           and s.device_fingerprint == ^device_fingerprint

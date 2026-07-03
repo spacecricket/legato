@@ -57,7 +57,7 @@ defmodule LegatoWeb.SignInController do
   def verify(conn, %{"email" => email, "code" => code}) do
     with  code_key                            <- get_session(conn, "code_key"),
           device_fingerprint                  <- generate_device_fingerprint(conn),
-          {:ok, %SignInCode{} = sign_in_code} <- Accounts.get_active_sign_in_code(code_key, device_fingerprint),
+          {:ok, %SignInCode{} = sign_in_code} <- Accounts.get_active_sign_in_code(code_key, code, device_fingerprint),
           {:ok, _}                            <- Accounts.verify_sign_in_code(sign_in_code)
     do
       Logger.info(inspect(sign_in_code))
