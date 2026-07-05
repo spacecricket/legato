@@ -1,16 +1,16 @@
 defmodule LegatoWeb.SignInController do
   use LegatoWeb, :controller
   require Logger
-  alias Legato.{Accounts, SignInCode, User}
+  alias Legato.{Accounts, SignInCode, User, Emails}
 
   def start(conn, %{"email" => email}) when is_binary(email) do
-    with  :not_signed_in                      <- check_auth(conn, email),
-          code                                <- Enum.random(100_000..999_999),
-          code_key                            <- Ecto.UUID.generate(),
-          {:ok, %User{} = user}               <- Accounts.get_user_by_email(email),
-          device_fingerprint                  <- generate_device_fingerprint(conn),
-          {:ok, %SignInCode{} = sign_in_code} <- Accounts.insert_sign_in_code(code, code_key, device_fingerprint, user),
-          :ok                                 <- send_sign_in_email(email, sign_in_code)
+    with  :not_signed_in                        <- check_auth(conn, email),
+          code                                  <- Enum.random(100_000..999_999),
+          code_key                              <- Ecto.UUID.generate(),
+          {:ok, %User{} = user}                 <- Accounts.get_user_by_email(email),
+          device_fingerprint                    <- generate_device_fingerprint(conn),
+          {:ok, %SignInCode{} = _sign_in_code}  <- Accounts.insert_sign_in_code(code, code_key, device_fingerprint, user),
+          {:ok, _result}                        <- Emails.verify_sign_in(user, code)
     do
       conn
       |> put_session("email", email)
@@ -26,9 +26,7 @@ defmodule LegatoWeb.SignInController do
         |> json(%{status: "signed-in", workspaceSlug: workspace_slug})
 
       # We lie to the client to prevent user-enumeration attacks, but log it internally.
-      {:error, reason} when reason == :not_found ->
-        Logger.warning("Sign-in blocked for #{email}: #{inspect(reason)}")
-
+      {:error, :not_found} ->
         # We generate a fake token hash so the response structure doesn't leak information.
         decoy_code_key = Ecto.UUID.generate()
         conn
@@ -81,12 +79,6 @@ defmodule LegatoWeb.SignInController do
     else
       :not_signed_in
     end
-  end
-
-
-  defp send_sign_in_email(email, %SignInCode{} = sign_in_code) do
-    Logger.info("to: #{email}: Your code is #{sign_in_code.code}")
-    :ok
   end
 
   defp generate_device_fingerprint(conn) do
