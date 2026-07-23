@@ -64,9 +64,8 @@ config :phoenix, :stacktrace_depth, 20
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
 
-config :legato, Legato.Mailer,
-  adapter: Swoosh.Adapters.Resend,
-  api_key: System.get_env("RESEND_API_KEY")
+# Configure Swoosh API Client
+config :swoosh, api_client: Swoosh.ApiClient.Req
 
-# Disable swoosh api client as it is only required for production adapters.
-# config :swoosh, :api_client, false
+# Disable Swoosh Local Memory Storage
+config :swoosh, local: false
