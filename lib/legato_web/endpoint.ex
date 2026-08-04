@@ -8,6 +8,7 @@ defmodule LegatoWeb.Endpoint do
     store: :cookie,
     key: "_legato_key",
     signing_salt: "KCV2mwCa",
+    encryption_salt: "zh5FpzX3",
     same_site: "Lax",
     http_only: true,       # Keeps it secure from JS theft
     max_age: 172_800       # <--- 2 days in seconds

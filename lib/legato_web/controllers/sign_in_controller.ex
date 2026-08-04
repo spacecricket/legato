@@ -37,17 +37,17 @@ defmodule LegatoWeb.SignInController do
 
       # Database Failure
       {:error, %Ecto.Changeset{} = changeset} ->
-        Logger.error("Database constraint failed while storing token for #{email}: #{inspect(changeset.errors)}")
+        Logger.error("Database constraint failed while storing token for #{get_hashed_email(email)}: #{inspect(changeset.errors)}")
         handle_sign_in_error(conn, email, :internal_server_error, "Unable to process request at this time.")
 
       # Email Delivery Failure
       {:error, :delivery_failed} ->
-        Logger.error("Failed to dispatch sign-in verification link email to #{email}.")
+        Logger.error("Failed to dispatch sign-in verification link email to #{get_hashed_email(email)}.")
         handle_sign_in_error(conn, email, :service_unavailable, "Sign-in verification email delivery failed. Please try again shortly.")
 
       # Catch-all
       {:error, reason} ->
-        Logger.error("Unexpected error starting sign-in for #{email}: #{inspect(reason)}")
+        Logger.error("Unexpected error starting sign-in for #{get_hashed_email(email)}: #{inspect(reason)}")
         handle_sign_in_error(conn, email, :internal_server_error, "An unexpected error occurred.")
     end
   end
@@ -58,7 +58,6 @@ defmodule LegatoWeb.SignInController do
           {:ok, %SignInCode{} = sign_in_code} <- Accounts.get_active_sign_in_code(code_key, code, device_fingerprint),
           {:ok, _}                            <- Accounts.verify_sign_in_code(sign_in_code)
     do
-      Logger.info(inspect(sign_in_code))
       workspace_slug = sign_in_code.workspace.slug
 
       conn
@@ -67,7 +66,7 @@ defmodule LegatoWeb.SignInController do
       |> json(%{status: "signed-in", workspaceSlug: workspace_slug})
     else
       {:error, reason} ->
-        Logger.error("Unexpected error verifying sign-in code #{code} for email #{email}: #{inspect(reason)}")
+        Logger.error("Unexpected error verifying sign-in code #{code} for email #{get_hashed_email(email)}: #{inspect(reason)}")
         conn
         |> json(%{status: "error", error: "An unexpected error occurred."})
     end
@@ -104,7 +103,7 @@ defmodule LegatoWeb.SignInController do
 
     # 3. Combine elements into a single deterministic string
     fingerprint_raw = "#{ip_string}||#{user_agent}||#{accept_lang}"
-    Logger.info("Raw fingerprint: #{fingerprint_raw}")
+    # Logger.info("Raw fingerprint: #{fingerprint_raw}")
 
     # 4. Hash using SHA256 and output as hex digits
     :crypto.hash(:sha256, fingerprint_raw) |> Base.encode16()
@@ -116,5 +115,13 @@ defmodule LegatoWeb.SignInController do
     |> put_session("signed-in", false)
     |> put_status(status)
     |> json(%{status: "error", error: client_message})
+  end
+
+  defp get_hashed_email(email) do
+    email
+    |> String.trim()
+    |> String.downcase()
+    |> then(& :crypto.hash(:sha256, &1))
+    |> Base.encode16(case: :lower)
   end
 end
