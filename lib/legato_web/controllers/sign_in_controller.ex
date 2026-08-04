@@ -64,7 +64,7 @@ defmodule LegatoWeb.SignInController do
       conn
       |> put_session("signed-in", true)
       |> put_session("workspace-slug", workspace_slug)
-      |> json(%{status: "verified", workspaceSlug: workspace_slug})
+      |> json(%{status: "signed-in", workspaceSlug: workspace_slug})
     else
       {:error, reason} ->
         Logger.error("Unexpected error verifying sign-in code #{code} for email #{email}: #{inspect(reason)}")
