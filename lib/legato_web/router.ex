@@ -17,6 +17,7 @@ defmodule LegatoWeb.Router do
 
       post "/start",  SignInController, :start
       post "/verify", SignInController, :verify
+      get "/token", SignInController, :token
     end
 
   end

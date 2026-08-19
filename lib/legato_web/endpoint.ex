@@ -11,15 +11,12 @@ defmodule LegatoWeb.Endpoint do
     encryption_salt: "zh5FpzX3",
     same_site: "Lax",
     http_only: true,       # Keeps it secure from JS theft
-    max_age: 172_800       # <--- 2 days in seconds
+    max_age: 604_800       # <--- 7 days in seconds
   ]
 
   socket "/live", Phoenix.LiveView.Socket,
     websocket: [connect_info: [session: @session_options]],
     longpoll: [connect_info: [session: @session_options]]
-
-  socket "/sign-in-socket", LegatoWeb.SignInSocket,
-    websocket: [connect_info: [session: @session_options]]
 
   socket "/workspace-socket", LegatoWeb.WorkspaceSocket,
     websocket: [connect_info: [session: @session_options]]

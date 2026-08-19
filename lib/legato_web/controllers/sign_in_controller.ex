@@ -13,14 +13,14 @@ defmodule LegatoWeb.SignInController do
           {:ok, _result}                        <- Emails.verify_sign_in(user, code)
     do
       conn
-      |> put_session("email", email)
-      |> put_session("code_key", code_key)
-      |> put_session("signed-in", false)
+      |> put_session(:email, email)
+      |> put_session(:code_key, code_key)
+      |> put_session(:signed_in, false)
       |> json(%{status: "pending-verification"})
     else
       # User is already authenticated
       :already_signed_in ->
-        workspace_slug = get_session(conn, "workspace-slug")
+        workspace_slug = get_session(conn, :workspace_slug)
 
         conn
         |> json(%{status: "signed-in", workspaceSlug: workspace_slug})
@@ -30,9 +30,9 @@ defmodule LegatoWeb.SignInController do
         # We generate a fake token hash so the response structure doesn't leak information.
         decoy_code_key = Ecto.UUID.generate()
         conn
-        |> put_session("email", email)
-        |> put_session("code_key", decoy_code_key)
-        |> put_session("signed-in", false)
+        |> put_session(:email, email)
+        |> put_session(:code_key, decoy_code_key)
+        |> put_session(:signed_in, false)
         |> json(%{status: "pending-verification"})
 
       # Database Failure
@@ -53,16 +53,26 @@ defmodule LegatoWeb.SignInController do
   end
 
   def verify(conn, %{"email" => email, "code" => code}) do
-    with  code_key                            <- get_session(conn, "code_key"),
+    with  code_key                            <- get_session(conn, :code_key),
           device_fingerprint                  <- generate_device_fingerprint(conn),
           {:ok, %SignInCode{} = sign_in_code} <- Accounts.get_active_sign_in_code(code_key, code, device_fingerprint),
           {:ok, _}                            <- Accounts.verify_sign_in_code(sign_in_code)
     do
+      user_id = sign_in_code.user_id
       workspace_slug = sign_in_code.workspace.slug
 
+      payload = %{
+        user_id: user_id,
+        workspace_slug: workspace_slug
+      }
+
+      token = Phoenix.Token.sign(conn, "workspace socket", payload)
+
       conn
-      |> put_session("signed-in", true)
-      |> put_session("workspace-slug", workspace_slug)
+      |> put_session(:signed_in, true)
+      |> put_session(:user_id, user_id)
+      |> put_session(:workspace_slug, workspace_slug)
+      |> put_session(:token, token)
       |> json(%{status: "signed-in", workspaceSlug: workspace_slug})
     else
       {:error, reason} ->
@@ -72,8 +82,33 @@ defmodule LegatoWeb.SignInController do
     end
   end
 
+  def token(conn, %{"workspaceSlug" => workspace_slug}) do
+    with  true            <- get_session(conn, :signed_in),
+          ^workspace_slug <- get_session(conn, :workspace_slug),
+          token           <- get_session(conn, :token) do
+      # Success: Signed in AND session's workspace_slug matches query param
+      json(conn, %{token: token})
+    else
+      false ->
+        conn
+        |> put_status(:unauthorized)
+        |> json(%{error: "Not signed in"})
+
+      nil ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: "No workspace in session or slug mismatch"})
+
+      # Handles cases where get_session returns a different string than workspace_slug
+      _mismatch ->
+        conn
+        |> put_status(:forbidden)
+        |> json(%{error: "Workspace slug does not match session"})
+    end
+  end
+
   defp check_auth(conn, email) do
-    if get_session(conn, "email") == email and get_session(conn, "signed-in") do
+    if get_session(conn, :email) == email and get_session(conn, :signed_in) do
       :already_signed_in
     else
       :not_signed_in
