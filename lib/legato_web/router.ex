@@ -20,6 +20,13 @@ defmodule LegatoWeb.Router do
       get "/token", SignInController, :token
     end
 
+    scope "/workspaces" do
+      pipe_through :api_session
+
+      get "/:workspaceSlug", WorkspaceController, :get_workspace
+      get "/:workspaceSlug/users", WorkspaceController, :get_workspace_users
+      get "/:workspaceSlug/me", WorkspaceController, :get_workspace_me
+    end
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

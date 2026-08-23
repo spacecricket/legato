@@ -1,7 +1,7 @@
 defmodule Legato.Accounts do
   require Logger
   import Ecto.Query
-  alias Legato.{Repo, User, SignInCode}
+  alias Legato.{Repo, User, SignInCode, Workspace}
 
   def get_user_by_email(email) when is_binary(email) do
     User
@@ -70,5 +70,22 @@ defmodule Legato.Accounts do
 
     SignInCode.verification_changeset(sign_in_code, attrs)
     |> Repo.update()
+  end
+
+  def get_workspace(workspace_slug) when is_binary(workspace_slug) do
+    case Repo.get_by(Workspace, slug: workspace_slug, status: :active) do
+      nil -> {:error, :not_found}
+      workspace -> {:ok, workspace}
+    end
+  end
+
+  def get_workspace_users(workspace_slug) when is_binary(workspace_slug) do
+    users =
+      User
+      |> join(:inner, [u], w in Workspace, on: u.workspace_id == w.id)
+      |> where([u, w], w.slug == ^workspace_slug and w.status == :active)
+      |> Repo.all()
+
+    {:ok, users}
   end
 end
