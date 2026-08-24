@@ -7,6 +7,10 @@
 # General application configuration
 import Config
 
+
+config :legato, Legato.Repo,
+  migration_primary_key: [type: :binary_id]
+
 config :legato,
   ecto_repos: [Legato.Repo],
   generators: [timestamp_type: :utc_datetime]

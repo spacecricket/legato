@@ -1,5 +1,5 @@
 defmodule Legato.Workspace do
-  use Ecto.Schema
+  use Legato.Schema
   import Ecto.Changeset
 
   schema "workspaces" do

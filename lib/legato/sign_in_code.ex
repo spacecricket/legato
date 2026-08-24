@@ -1,5 +1,5 @@
 defmodule Legato.SignInCode do
-  use Ecto.Schema
+  use Legato.Schema
   import Ecto.Changeset
 
   schema "sign_in_codes" do

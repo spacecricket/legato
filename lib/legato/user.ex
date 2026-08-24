@@ -1,5 +1,5 @@
 defmodule Legato.User do
-  use Ecto.Schema
+  use Legato.Schema
   import Ecto.Changeset
 
   schema "users" do
@@ -22,7 +22,7 @@ defmodule Legato.User do
   def changeset(user, attrs) do
     user
     |> cast(attrs, [:workspace_id, :email, :first_name, :last_name, :handle, :phone_number, :avatar_url, :inserted_by, :updated_by])
-    |> validate_required([:workspace_id, :email, :first_name, :last_name, :handle, :phone_number, :avatar_url, :inserted_by, :updated_by])
+    |> validate_required([:workspace_id, :email, :first_name, :last_name, :handle, :inserted_by, :updated_by])
     |> unique_constraint(:email)
     |> foreign_key_constraint(:workspace_id)
   end
