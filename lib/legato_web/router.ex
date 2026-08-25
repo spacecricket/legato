@@ -23,9 +23,8 @@ defmodule LegatoWeb.Router do
     scope "/workspaces" do
       pipe_through :api_session
 
-      get "/:workspaceSlug", WorkspaceController, :get_workspace
-      get "/:workspaceSlug/users", WorkspaceController, :get_workspace_users
-      get "/:workspaceSlug/me", WorkspaceController, :get_workspace_me
+      get "/:workspaceId", WorkspaceController, :get_workspace
+      get "/:workspaceId/users", WorkspaceController, :get_workspace_users
     end
   end
 

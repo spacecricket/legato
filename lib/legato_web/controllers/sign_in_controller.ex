@@ -59,6 +59,7 @@ defmodule LegatoWeb.SignInController do
           {:ok, _}                            <- Accounts.verify_sign_in_code(sign_in_code)
     do
       user_id = sign_in_code.user_id
+      workspace_id = sign_in_code.workspace_id
       workspace_slug = sign_in_code.workspace.slug
 
       payload = %{
@@ -71,6 +72,7 @@ defmodule LegatoWeb.SignInController do
       conn
       |> put_session(:signed_in, true)
       |> put_session(:user_id, user_id)
+      |> put_session(:workspace_id, workspace_id)
       |> put_session(:workspace_slug, workspace_slug)
       |> put_session(:token, token)
       |> json(%{status: "signed-in", workspaceSlug: workspace_slug})
@@ -85,9 +87,15 @@ defmodule LegatoWeb.SignInController do
   def token(conn, %{"workspaceSlug" => workspace_slug}) do
     with  true            <- get_session(conn, :signed_in),
           ^workspace_slug <- get_session(conn, :workspace_slug),
+          workspace_id    <- get_session(conn, :workspace_id),
+          user_id         <- get_session(conn, :user_id),
           token           <- get_session(conn, :token) do
       # Success: Signed in AND session's workspace_slug matches query param
-      json(conn, %{token: token})
+      json(conn, %{
+        token: token,
+        workspaceId: workspace_id,
+        userId: user_id
+      })
     else
       false ->
         conn
@@ -97,14 +105,8 @@ defmodule LegatoWeb.SignInController do
       nil ->
         conn
         |> put_status(:bad_request)
-        |> json(%{error: "No workspace in session or slug mismatch"})
-
-      # Handles cases where get_session returns a different string than workspace_slug
-      _mismatch ->
-        conn
-        |> put_status(:forbidden)
-        |> json(%{error: "Workspace slug does not match session"})
-    end
+        |> json(%{error: "Session is missing some properties"})
+   end
   end
 
   defp check_auth(conn, email) do
