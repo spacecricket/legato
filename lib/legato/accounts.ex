@@ -1,7 +1,8 @@
 defmodule Legato.Accounts do
   require Logger
   import Ecto.Query
-  alias Legato.{Repo, User, SignInCode, Workspace}
+  alias Legato.Repo
+  alias Legato.Chat.Schemas.{User, SignInCode, Workspace}
 
   def get_user_by_email(email) when is_binary(email) do
     User

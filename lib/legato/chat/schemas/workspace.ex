@@ -1,4 +1,4 @@
-defmodule Legato.Workspace do
+defmodule Legato.Chat.Schemas.Workspace do
   use Legato.Schema
   import Ecto.Changeset
 

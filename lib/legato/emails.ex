@@ -1,6 +1,7 @@
 defmodule Legato.Emails do
   import Swoosh.Email
-  alias Legato.{Mailer, User}
+  alias Legato.Mailer
+  alias Legato.Chat.Schemas.User
 
   def verify_sign_in(%User{} = user, code) when is_integer(code) do
     new()

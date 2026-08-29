@@ -1,7 +1,8 @@
 defmodule LegatoWeb.SignInController do
   use LegatoWeb, :controller
   require Logger
-  alias Legato.{Accounts, SignInCode, User, Emails}
+  alias Legato.{Accounts, Emails}
+  alias Legato.Chat.Schemas.{SignInCode, User}
 
   def start(conn, %{"email" => email}) when is_binary(email) do
     with  :not_signed_in                        <- check_auth(conn, email),

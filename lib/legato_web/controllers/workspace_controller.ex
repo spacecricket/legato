@@ -1,7 +1,8 @@
 defmodule LegatoWeb.WorkspaceController do
   use LegatoWeb, :controller
   require Logger
-  alias Legato.{Accounts, Workspace, User}
+  alias Legato.Accounts
+  alias Legato.Chat.Schemas.{Workspace, User}
 
   def get_workspace(conn, %{"workspaceId" => workspace_id}) when is_binary(workspace_id) do
     with  true                            <- get_session(conn, :signed_in),

@@ -1,4 +1,4 @@
-defmodule Legato.SignInCode do
+defmodule Legato.Chat.Schemas.SignInCode do
   use Legato.Schema
   import Ecto.Changeset
 
@@ -8,8 +8,8 @@ defmodule Legato.SignInCode do
     field :device_fingerprint, :string
     field :expires_at, :utc_datetime
     field :verified_at, :utc_datetime
-    belongs_to :workspace, Legato.Workspace
-    belongs_to :user, Legato.User
+    belongs_to :workspace, Legato.Chat.Schemas.Workspace
+    belongs_to :user, Legato.Chat.Schemas.User
 
     timestamps(type: :utc_datetime)
   end

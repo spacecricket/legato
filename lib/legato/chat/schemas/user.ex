@@ -1,4 +1,4 @@
-defmodule Legato.User do
+defmodule Legato.Chat.Schemas.User do
   use Legato.Schema
   import Ecto.Changeset
 
@@ -13,7 +13,7 @@ defmodule Legato.User do
     field :is_deleted, :boolean, default: false
     field :inserted_by, :string
     field :updated_by, :string
-    belongs_to :workspace, Legato.Workspace
+    belongs_to :workspace, Legato.Chat.Schemas.Workspace, type: :binary_id
 
     timestamps(type: :utc_datetime)
   end
