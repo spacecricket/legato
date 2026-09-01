@@ -1,10 +1,10 @@
 defmodule LegatoWeb.ThreadSummaryJSON do
-  alias Legato.Chat.Schemas.{Thread, ThreadMember}
+  alias Legato.Chat.Schemas.{Thread, ThreadMember, Zap}
 
   @doc """
   Renders a list of thread summaries.
   """
-  def index(%{threads: threads}) do
+  def index(%{threads: threads, user_id: user_id}) do
     for %Thread{} = thread <- threads do
       %{
         id: thread.id,
@@ -18,7 +18,8 @@ defmodule LegatoWeb.ThreadSummaryJSON do
         updated_by: thread.updated_by,
         inserted_at: thread.inserted_at,
         updated_at: thread.updated_at,
-        thread_members: get_thread_members(thread.thread_members)
+        thread_members: get_thread_members(thread.thread_members),
+        unacked_zaps: get_unacked_zaps(thread.unacked_zaps, user_id)
       }
     end
   end
@@ -37,6 +38,25 @@ defmodule LegatoWeb.ThreadSummaryJSON do
         updated_by: thread_member.updated_by,
         inserted_at: thread_member.inserted_at,
         updated_at: thread_member.updated_at
+      }
+    end
+  end
+
+  defp get_unacked_zaps(unacked_zaps, user_id) when is_list(unacked_zaps) and is_binary(user_id) do
+    for %Zap{to_user_id: ^user_id} = zap <- unacked_zaps do
+      %{
+        id: zap.id,
+        workspace_id: zap.workspace_id,
+        thread_id: zap.thread_id,
+        thread_message_id: zap.thread_message_id,
+        from_user_id: zap.from_user_id,
+        to_user_id: zap.to_user_id,
+        is_acked: zap.is_acked,
+        is_deleted: zap.is_deleted,
+        inserted_by: zap.inserted_by,
+        updated_by: zap.updated_by,
+        inserted_at: zap.inserted_at,
+        updated_at: zap.updated_at
       }
     end
   end
