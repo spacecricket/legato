@@ -2,7 +2,6 @@ defmodule Legato.Chat.Schemas.User do
   use Legato.Schema
   import Ecto.Changeset
 
-  @derive {Jason.Encoder, except: [:__meta__, :workspace]}
   schema "users" do
     field :email, :string
     field :first_name, :string

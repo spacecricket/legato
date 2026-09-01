@@ -8,7 +8,7 @@ defmodule LegatoWeb.ThreadSummaryController do
 
   def get_active_thread_summaries(
     conn,
-    %{"workspaceId" => workspace_id, "userId" => user_id}
+    %{"workspace_id" => workspace_id, "user_id" => user_id}
   ) when is_binary(workspace_id) and is_binary(user_id) do
 
     with true <- get_session(conn, :signed_in),
@@ -26,7 +26,7 @@ defmodule LegatoWeb.ThreadSummaryController do
           where: t.id in subquery(unread_thread_ids),
           preload: [:thread_members]
 
-      json(conn, Repo.all(query))
+      render(conn, :index, threads: Repo.all(query))
     else
       false ->
         conn
@@ -39,16 +39,4 @@ defmodule LegatoWeb.ThreadSummaryController do
         |> json(%{error: "No workspace in session or slug mismatch"})
     end
   end
-
-  #     {:error, :not_found} ->
-  #       conn
-  #       |> put_status(:not_found)
-  #       |> json(%{error: "Workspace not found"})
-
-  #     _ ->
-  #       conn
-  #       |> put_status(:forbidden)
-  #       |> json(%{error: "Forbidden"})
-  #   end
-  # end
 end

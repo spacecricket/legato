@@ -2,7 +2,6 @@ defmodule Legato.Chat.Schemas.Thread do
   use Legato.Schema
   import Ecto.Changeset
 
-  @derive {Jason.Encoder, except: [:__meta__, :workspace]}
   schema "threads" do
     field :name, :string
     field :is_private, :boolean, default: false

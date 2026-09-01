@@ -3,6 +3,7 @@ defmodule LegatoWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug ProperCase.Plug.SnakeCaseParams
   end
 
   pipeline :api_session do
@@ -23,9 +24,9 @@ defmodule LegatoWeb.Router do
     scope "/workspaces" do
       pipe_through :api_session
 
-      get "/:workspaceId", WorkspaceController, :get_workspace
-      get "/:workspaceId/users", WorkspaceController, :get_workspace_users
-      get "/:workspaceId/users/:userId/active-thread-summaries", ThreadSummaryController, :get_active_thread_summaries
+      get "/:workspace_id", WorkspaceController, :get_workspace
+      get "/:workspace_id/users", WorkspaceController, :get_workspace_users
+      get "/:workspace_id/users/:user_id/active-thread-summaries", ThreadSummaryController, :get_active_thread_summaries
     end
   end
 

@@ -17,14 +17,14 @@ defmodule LegatoWeb.SignInController do
       |> put_session(:email, email)
       |> put_session(:code_key, code_key)
       |> put_session(:signed_in, false)
-      |> json(%{status: "pending-verification"})
+      |> render(:status, status: "pending-verification")
     else
       # User is already authenticated
       :already_signed_in ->
         workspace_slug = get_session(conn, :workspace_slug)
 
         conn
-        |> json(%{status: "signed-in", workspaceSlug: workspace_slug})
+        |> render(:status_and_slug, status: "signed-in", workspaceSlug: workspace_slug)
 
       # We lie to the client to prevent user-enumeration attacks, but log it internally.
       {:error, :not_found} ->
@@ -34,7 +34,7 @@ defmodule LegatoWeb.SignInController do
         |> put_session(:email, email)
         |> put_session(:code_key, decoy_code_key)
         |> put_session(:signed_in, false)
-        |> json(%{status: "pending-verification"})
+        |> render(:status, status: "pending-verification")
 
       # Database Failure
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -76,7 +76,7 @@ defmodule LegatoWeb.SignInController do
       |> put_session(:workspace_id, workspace_id)
       |> put_session(:workspace_slug, workspace_slug)
       |> put_session(:token, token)
-      |> json(%{status: "signed-in", workspaceSlug: workspace_slug})
+      |> render(:status_and_slug, status: "signed-in", workspaceSlug: workspace_slug)
     else
       {:error, reason} ->
         Logger.error("Unexpected error verifying sign-in code #{code} for email #{get_hashed_email(email)}: #{inspect(reason)}")
@@ -85,18 +85,14 @@ defmodule LegatoWeb.SignInController do
     end
   end
 
-  def token(conn, %{"workspaceSlug" => workspace_slug}) do
+  def token(conn, %{"workspace_slug" => workspace_slug}) do
     with  true            <- get_session(conn, :signed_in),
           ^workspace_slug <- get_session(conn, :workspace_slug),
           workspace_id    <- get_session(conn, :workspace_id),
           user_id         <- get_session(conn, :user_id),
           token           <- get_session(conn, :token) do
       # Success: Signed in AND session's workspace_slug matches query param
-      json(conn, %{
-        token: token,
-        workspaceId: workspace_id,
-        userId: user_id
-      })
+      render(conn, :token, token: token, workspace_id: workspace_id, user_id: user_id)
     else
       false ->
         conn
