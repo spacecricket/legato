@@ -2,6 +2,7 @@ defmodule Legato.Chat.Schemas.Workspace do
   use Legato.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, except: [:__meta__]}
   schema "workspaces" do
     field :slug, :string
     field :name, :string

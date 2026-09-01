@@ -72,22 +72,4 @@ defmodule Legato.Accounts do
     SignInCode.verification_changeset(sign_in_code, attrs)
     |> Repo.update()
   end
-
-  @spec get_workspace(binary()) :: {:error, :not_found} | {:ok, any()}
-  def get_workspace(workspace_id) when is_binary(workspace_id) do
-    case Repo.get_by(Workspace, id: workspace_id, status: :active) do
-      nil -> {:error, :not_found}
-      workspace -> {:ok, workspace}
-    end
-  end
-
-  def get_workspace_users(workspace_id) when is_binary(workspace_id) do
-    users =
-      User
-      |> join(:inner, [u], w in Workspace, on: u.workspace_id == w.id)
-      |> where([u, w], w.id == ^workspace_id and w.status == :active)
-      |> Repo.all()
-
-    {:ok, users}
-  end
 end

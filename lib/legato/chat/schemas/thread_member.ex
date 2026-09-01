@@ -2,6 +2,7 @@ defmodule Legato.Chat.Schemas.ThreadMember do
   use Legato.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, except: [:__meta__, :workspace, :thread, :user]}
   schema "thread_members" do
     field :is_deleted, :boolean, default: false
     field :watermark, :integer, default: 0

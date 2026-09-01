@@ -1,43 +1,44 @@
 defmodule LegatoWeb.ThreadSummaryController do
   use LegatoWeb, :controller
-  # require Logger
-  # alias Legato.{Accounts, Workspace, User}
+  require Logger
+  import Ecto.Query
+  alias Legato.Repo
+  # alias Legato.Chat.Chat
+  alias Legato.Chat.Schemas.{Thread, ThreadMember}
 
-  # def get_active_thread_summaries(
-  #   conn,
-  #   %{"workspaceId" => workspace_id, "userId" => user_id}
-  # ) when is_binary(workspace_id) and is_binary(user_id) do
+  def get_active_thread_summaries(
+    conn,
+    %{"workspaceId" => workspace_id, "userId" => user_id}
+  ) when is_binary(workspace_id) and is_binary(user_id) do
 
-  #   with  true                            <- get_session(conn, :signed_in),
-  #         ^workspace_id                   <- get_session(conn, :workspace_id),
-  #         ^user_id                        <- get_session(conn, :user_id),
-  #         {:ok, thread_summaries} when is_list(thread_summaries) <- Accounts.get_workspace_users(workspace_id),
-  #         true                            <- Enum.all?(thread_summaries, &match?(%User{}, &1)) do
+    with true <- get_session(conn, :signed_in),
+      ^workspace_id <- get_session(conn, :workspace_id),
+      ^user_id <- get_session(conn, :user_id) do
 
-  #       formatted_users = Enum.map(users, fn %User{} = user ->
-  #       %{
-  #         id:         user.id,
-  #         firstName:  user.first_name,
-  #         lastName:   user.last_name,
-  #         handle:     user.handle,
-  #         avatarUrl:  user.avatar_url,
-  #         isGuest:    user.is_guest,
-  #         isDeleted:  user.is_deleted,
-  #         updatedAt:  user.updated_at
-  #       }
-  #     end)
+      unread_thread_ids =
+        from tm in ThreadMember,
+          join: t in assoc(tm, :thread),
+          where: tm.user_id == ^user_id and t.message_count >= tm.watermark and not t.is_deleted and not tm.is_deleted,
+          select: tm.thread_id
 
-  #     json(conn, formatted_users)
-  #   else
-  #     false ->
-  #       conn
-  #       |> put_status(:unauthorized)
-  #       |> json(%{error: "Not signed in"})
+      query =
+        from t in Thread,
+          where: t.id in subquery(unread_thread_ids),
+          preload: [:thread_members]
 
-  #     nil ->
-  #       conn
-  #       |> put_status(:bad_request)
-  #       |> json(%{error: "No workspace in session or slug mismatch"})
+      json(conn, Repo.all(query))
+    else
+      false ->
+        conn
+        |> put_status(:unauthorized)
+        |> json(%{error: "Not signed in"})
+
+      nil ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: "No workspace in session or slug mismatch"})
+    end
+  end
 
   #     {:error, :not_found} ->
   #       conn

@@ -2,6 +2,7 @@ defmodule Legato.Chat.Schemas.Thread do
   use Legato.Schema
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, except: [:__meta__, :workspace]}
   schema "threads" do
     field :name, :string
     field :is_private, :boolean, default: false
@@ -11,6 +12,7 @@ defmodule Legato.Chat.Schemas.Thread do
     field :inserted_by, :string
     field :updated_by, :string
     belongs_to :workspace, Legato.Chat.Schemas.Workspace, type: :binary_id
+    has_many :thread_members, Legato.Chat.Schemas.ThreadMember
 
     timestamps(type: :utc_datetime)
   end
