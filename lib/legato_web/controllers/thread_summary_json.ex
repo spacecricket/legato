@@ -7,20 +7,35 @@ defmodule LegatoWeb.ThreadSummaryJSON do
   def index(%{threads: threads, user_id: user_id}) do
     for %Thread{} = thread <- threads do
       %{
-        id: thread.id,
-        workspace_id: thread.workspace_id,
-        name: thread.name,
-        is_private: thread.is_private,
-        is_deleted: thread.is_deleted,
-        message_count: thread.message_count,
-        last_message_at: thread.last_message_at,
-        inserted_by: thread.inserted_by,
-        updated_by: thread.updated_by,
-        inserted_at: thread.inserted_at,
-        updated_at: thread.updated_at,
+        thread: %{
+          id: thread.id,
+          workspace_id: thread.workspace_id,
+          name: thread.name,
+          is_private: thread.is_private,
+          is_deleted: thread.is_deleted,
+          message_count: thread.message_count,
+          last_message_at: thread.last_message_at,
+          inserted_by: thread.inserted_by,
+          updated_by: thread.updated_by,
+          inserted_at: thread.inserted_at,
+          updated_at: thread.updated_at
+        },
+        inbound_zaps: get_unacked_zaps(thread.unacked_zaps, user_id),
         thread_members: get_thread_members(thread.thread_members),
-        unacked_zaps: get_unacked_zaps(thread.unacked_zaps, user_id)
+        watermark: get_watermark(thread.thread_members, user_id),
+        latest_message: nil
       }
+    end
+  end
+
+  defp get_watermark(thread_members, user_id) when is_list(thread_members) and is_binary(user_id) do
+    case Enum.find(thread_members, &(&1.user_id == user_id)) do
+      %ThreadMember{} = thread_member -> %{
+        thread_id: thread_member.thread_id,
+        sequence_number: thread_member.watermark,
+        updated_at: thread_member.watermark_updated_at
+      }
+      nil -> nil
     end
   end
 
