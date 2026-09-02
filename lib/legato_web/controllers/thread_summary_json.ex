@@ -23,7 +23,7 @@ defmodule LegatoWeb.ThreadSummaryJSON do
         inbound_zaps: get_unacked_zaps(thread.unacked_zaps, user_id),
         thread_members: get_thread_members(thread.thread_members),
         watermark: get_watermark(thread.thread_members, user_id),
-        latest_message: nil
+        latest_message: thread.latest_message
       }
     end
   end

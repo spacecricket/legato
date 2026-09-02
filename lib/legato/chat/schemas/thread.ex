@@ -13,6 +13,7 @@ defmodule Legato.Chat.Schemas.Thread do
     belongs_to :workspace, Legato.Chat.Schemas.Workspace, type: :binary_id
     has_many :thread_members, Legato.Chat.Schemas.ThreadMember
     has_many :unacked_zaps, Legato.Chat.Schemas.Zap, where: [is_deleted: false, is_acked: false]
+    has_one :latest_message, Legato.Chat.Schemas.ThreadMessage
 
     timestamps(type: :utc_datetime)
   end

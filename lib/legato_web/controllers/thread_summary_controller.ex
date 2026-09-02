@@ -28,10 +28,15 @@ defmodule LegatoWeb.ThreadSummaryController do
 
       thread_ids_query = Ecto.Query.union(unread_thread_ids_query, ^zapped_thread_ids_query)
 
+      latest_message_query =
+        from m in Legato.Chat.Schemas.ThreadMessage,
+          join: t in Legato.Chat.Schemas.Thread,
+          on: t.id == m.thread_id and m.sequence_number == t.message_count
+
       query =
         from t in Thread,
           where: t.id in subquery(thread_ids_query),
-          preload: [:thread_members, :unacked_zaps]
+          preload: [:thread_members, :unacked_zaps, latest_message: ^latest_message_query]
 
       render(conn, :index, threads: Repo.all(query), user_id: user_id)
     else
