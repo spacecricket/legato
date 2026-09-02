@@ -24,7 +24,7 @@ defmodule LegatoWeb.SignInController do
         workspace_slug = get_session(conn, :workspace_slug)
 
         conn
-        |> render(:status_and_slug, status: "signed-in", workspaceSlug: workspace_slug)
+        |> render(:status_and_slug, status: "signed-in", workspace_slug: workspace_slug)
 
       # We lie to the client to prevent user-enumeration attacks, but log it internally.
       {:error, :not_found} ->
@@ -76,7 +76,7 @@ defmodule LegatoWeb.SignInController do
       |> put_session(:workspace_id, workspace_id)
       |> put_session(:workspace_slug, workspace_slug)
       |> put_session(:token, token)
-      |> render(:status_and_slug, status: "signed-in", workspaceSlug: workspace_slug)
+      |> render(:status_and_slug, %{status: "signed-in", workspace_slug: workspace_slug})
     else
       {:error, reason} ->
         Logger.error("Unexpected error verifying sign-in code #{code} for email #{get_hashed_email(email)}: #{inspect(reason)}")
@@ -92,7 +92,7 @@ defmodule LegatoWeb.SignInController do
           user_id         <- get_session(conn, :user_id),
           token           <- get_session(conn, :token) do
       # Success: Signed in AND session's workspace_slug matches query param
-      render(conn, :token, token: token, workspace_id: workspace_id, user_id: user_id)
+      render(conn, :token, %{token: token, workspace_id: workspace_id, user_id: user_id})
     else
       false ->
         conn
