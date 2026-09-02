@@ -1,5 +1,5 @@
 defmodule LegatoWeb.ThreadSummaryJSON do
-  alias Legato.Chat.Schemas.{Thread, ThreadMember, Zap}
+  alias Legato.Chat.Schemas.{Thread, ThreadMember, ThreadMessage, Zap}
 
   @doc """
   Renders a list of thread summaries.
@@ -23,9 +23,28 @@ defmodule LegatoWeb.ThreadSummaryJSON do
         inbound_zaps: get_unacked_zaps(thread.unacked_zaps, user_id),
         thread_members: get_thread_members(thread.thread_members),
         watermark: get_watermark(thread.thread_members, user_id),
-        latest_message: thread.latest_message
+        latest_message: get_latest_message(thread.latest_message)
       }
     end
+  end
+
+  defp get_latest_message(nil), do: nil
+  defp get_latest_message(%ThreadMessage{} = message) do
+    %{
+      id: message.id,
+      workspace_id: message.workspace_id,
+      thread_id: message.thread_id,
+      user_id: message.user_id,
+      sequence_number: message.sequence_number,
+      version: message.version,
+      content: message.content,
+      content_format_version: message.content_format_version,
+      is_deleted: message.is_deleted,
+      inserted_by: message.inserted_by,
+      updated_by: message.updated_by,
+      inserted_at: message.inserted_at,
+      updated_at: message.updated_at
+    }
   end
 
   defp get_watermark(thread_members, user_id) when is_list(thread_members) and is_binary(user_id) do

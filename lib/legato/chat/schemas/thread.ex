@@ -25,4 +25,11 @@ defmodule Legato.Chat.Schemas.Thread do
     |> validate_required([:workspace_id, :name, :inserted_by, :updated_by])
     |> foreign_key_constraint(:workspace_id)
   end
+
+  @doc false
+  def update_on_message_changeset(thread, attrs) do
+    thread
+    |> cast(attrs, [:message_count, :last_message_at])
+    |> validate_required([:message_count, :last_message_at])
+  end
 end
