@@ -27,6 +27,8 @@ defmodule LegatoWeb.Router do
       get "/:workspace_id", WorkspaceController, :get_workspace
       get "/:workspace_id/users", WorkspaceController, :get_workspace_users
       get "/:workspace_id/users/:user_id/active-thread-summaries", ThreadSummaryController, :get_active_thread_summaries
+      get "/:workspace_id/users/:user_id/thread-summaries", ThreadSummaryController, :get_thread_summaries
+      get "/:workspace_id/threads/:thread_id/messages", ThreadMessageController, :get_messages
     end
   end
 
