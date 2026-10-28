@@ -39,12 +39,12 @@ defmodule Legato.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.8.8"},
+      {:phoenix, "~> 1.8.16"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.13"},
-      {:postgrex, ">= 0.0.0"},
-      {:phoenix_live_dashboard, "~> 0.8.3"},
-      {:swoosh, "~> 1.16"},
+      {:postgrex, ">= 0.22.4"},
+      {:phoenix_live_dashboard, "~> 0.9.1"},
+      {:swoosh, "~> 1.29.0"},
       {:req, "~> 0.5"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
@@ -54,7 +54,7 @@ defmodule Legato.MixProject do
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
       {:corsica, "~> 2.0"},
-      {:hackney, "~> 4.0"}
+      {:hackney, "~> 4.9.0"}
     ]
   end
 

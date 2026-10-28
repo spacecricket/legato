@@ -2,7 +2,7 @@ defmodule Legato.Accounts do
   require Logger
   import Ecto.Query
   alias Legato.Repo
-  alias Legato.Chat.Schemas.{User, SignInCode, Workspace}
+  alias Legato.Chat.Schemas.{User, SignInCode}
 
   def get_user_by_email(email) when is_binary(email) do
     User
@@ -12,7 +12,9 @@ defmodule Legato.Accounts do
     |> where([u, w], u.email == ^email and not u.is_deleted and w.status == :active)
     |> Repo.one()
     |> case do
-      nil -> {:error, :not_found}
+      nil ->
+        {:error, :not_found}
+
       user ->
         Logger.info(user)
         {:ok, user}
@@ -48,13 +50,13 @@ defmodule Legato.Accounts do
 
     SignInCode
     |> where(
-        [s],
-        s.code_key == ^code_key
-          and s.code == ^code_int
-          and is_nil(s.verified_at)
-          and s.expires_at > ^now
-          and s.device_fingerprint == ^device_fingerprint
-      )
+      [s],
+      s.code_key == ^code_key and
+        s.code == ^code_int and
+        is_nil(s.verified_at) and
+        s.expires_at > ^now and
+        s.device_fingerprint == ^device_fingerprint
+    )
     |> Repo.one()
     |> case do
       nil -> {:error, :not_found}

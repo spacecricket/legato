@@ -2,7 +2,7 @@ defmodule LegatoWeb.WorkspaceSocket do
   use Phoenix.Socket
   # require Logger
 
-  channel "workspace:*", LegatoWeb.WorkspaceChannel
+  # channel "workspace:*", LegatoWeb.WorkspaceChannel
   channel "user:*", LegatoWeb.UserChannel
   # Need to join user channel too
 
@@ -16,6 +16,7 @@ defmodule LegatoWeb.WorkspaceSocket do
           |> assign(:user_id, user_id)
           |> assign(:workspace_slug, workspace_slug)
         }
+
       {:error, _} ->
         :error
     end
