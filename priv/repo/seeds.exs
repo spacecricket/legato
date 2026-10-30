@@ -99,6 +99,17 @@ add_thread_message = fn %Thread{} = thread, sequence_number, %User{} = user, con
   end)
 end
 
+set_watermark = fn %User{} = user, %Thread{} = thread, sequence_number ->
+  thread_member = Repo.get_by!(ThreadMember, thread_id: thread.id, user_id: user.id)
+
+  thread_member
+  |> ThreadMember.watermark_changeset(%{
+    watermark: sequence_number,
+    watermark_updated_at: DateTime.utc_now() |> DateTime.truncate(:second)
+  })
+  |> Repo.update!()
+end
+
 # =============================================
 # Users
 
@@ -156,3 +167,30 @@ add_thread_member.(thread_themes_on_legato, david)
 add_thread_member.(thread_themes_on_legato, elle)
 
 add_thread_message.(thread_themes_on_legato, 1, cathy, "Let's just copy Slack.")
+
+# --------------
+thread_welcome_to_legato = add_thread.("Welcome to Legato email contents")
+
+add_thread_member.(thread_welcome_to_legato, jatin)
+add_thread_member.(thread_welcome_to_legato, bruce)
+add_thread_member.(thread_welcome_to_legato, david)
+add_thread_member.(thread_welcome_to_legato, frank)
+add_thread_member.(thread_welcome_to_legato, gina)
+
+add_thread_message.(
+  thread_welcome_to_legato,
+  1,
+  frank,
+  "I need some thoughts on what the welcome email should say."
+)
+
+add_thread_message.(
+  thread_welcome_to_legato,
+  2,
+  bruce,
+  "Say it's the best thing since sliced bread."
+)
+
+add_thread_message.(thread_welcome_to_legato, 3, jatin, "Is there a gluten-free version?")
+
+set_watermark.(jatin, thread_welcome_to_legato, 3)
