@@ -11,7 +11,7 @@
 # and so on) as they will fail if something goes wrong.
 require Logger
 alias Legato.Repo
-alias Legato.Chat.Schemas.{Thread, ThreadMember, ThreadMessage, User, Workspace, Zap}
+alias Legato.Chat.Schemas.{Thread, ThreadMember, ThreadMessage, User, Workspace}
 
 Logger.info("Mix.env() == #{Mix.env()}")
 
@@ -194,3 +194,82 @@ add_thread_message.(
 add_thread_message.(thread_welcome_to_legato, 3, jatin, "Is there a gluten-free version?")
 
 set_watermark.(jatin, thread_welcome_to_legato, 3)
+
+# =============================================
+# Inactive threads for Jatin
+#
+# The work view loads thread summaries in activity order and splits them into
+# active/inactive client-side, paging 50 rows at a time. These threads are all
+# read by Jatin (watermark == message_count) and get distinct last_message_at
+# values so the inactive section has enough rows to exercise cursor pagination.
+
+inactive_thread_count = 100
+
+inactive_thread_topics = [
+  "Roadmap grooming",
+  "Design review",
+  "Release checklist",
+  "Hiring loop debrief",
+  "Customer feedback triage",
+  "Incident postmortem",
+  "Sprint retro",
+  "API design review",
+  "Onboarding notes",
+  "Pricing experiment"
+]
+
+inactive_thread_authors = [alice, bruce, cathy, david, elle, frank, gina]
+
+now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+add_inactive_thread = fn name, author, content, last_message_at ->
+  thread =
+    Repo.get_by(Thread, name: name, workspace_id: workspace.id) ||
+      Repo.insert!(%Thread{
+        workspace_id: workspace.id,
+        name: name,
+        message_count: 1,
+        last_message_at: last_message_at,
+        inserted_at: last_message_at,
+        updated_at: last_message_at,
+        inserted_by: "seeds",
+        updated_by: "seeds"
+      })
+
+  Repo.get_by(ThreadMessage, thread_id: thread.id, sequence_number: 1) ||
+    Repo.insert!(%ThreadMessage{
+      sequence_number: 1,
+      content: content,
+      content_format_version: 1,
+      workspace_id: workspace.id,
+      thread_id: thread.id,
+      user_id: author.id,
+      inserted_at: last_message_at,
+      updated_at: last_message_at,
+      inserted_by: "seeds",
+      updated_by: "seeds"
+    })
+
+  add_thread_member.(thread, jatin)
+  add_thread_member.(thread, author)
+
+  # watermark == message_count, so the thread is inactive for Jatin
+  set_watermark.(jatin, thread, 1)
+end
+
+Enum.each(1..inactive_thread_count, fn index ->
+  topic = Enum.at(inactive_thread_topics, rem(index - 1, length(inactive_thread_topics)))
+  author = Enum.at(inactive_thread_authors, rem(index, length(inactive_thread_authors)))
+
+  # one hour apart, so each page has a distinct cursor timestamp to page through
+  last_message_at = DateTime.add(now, -index, :hour)
+
+  add_inactive_thread.(
+    "#{topic} ##{index}",
+    author,
+    "Wrapped up the #{String.downcase(topic)} discussion - no follow-up needed.",
+    last_message_at
+  )
+end)
+
+Logger.info("Seeded #{inactive_thread_count} inactive threads for @#{jatin.handle}")
